@@ -2,11 +2,34 @@
 import requests
 import os
 import errno
+import platform
+
+KEEP_RECENT = 5
+
+"""
+This function will clean up the Wallpaper folder to save disk space.
+If all wallpapers are removed from the folder, only primary monitor will
+show the wallpaper. For external monitor, we need to keep the wallpaper in
+Wallpaper folder. So we will keep most KEEP_RECENT number of wallpaper in the folder.
+"""
+
+
+def clean_wallpaper_folder(file_path):
+    folder_dir = os.path.dirname(file_path)
+    os.system("cd " + folder_dir + " && ls -t | tail -n +" + KEEP_RECENT + " | xargs rm --")
 
 
 def set_wallpaper(wp_uri):
     # TODO: set wallpaper for different OS
-    os.system("/usr/bin/gsettings set org.gnome.desktop.background picture-uri file://" + wp_uri)
+    os_platform = platform.system()
+    if os_platform.startswith("Linux"):
+        # handle for linux
+        os.system("/usr/bin/gsettings set org.gnome.desktop.background picture-uri file://" + wp_uri)
+    elif os_platform == "Darwin":
+        # handle for MAC
+        os.system("osascript -e 'tell application \"Finder\" to set desktop picture to POSIX file " + wp_uri)
+    else:
+        print("Your OS is not supported yet.")
 
 
 def get_bing_wallpaper_of_the_day():
@@ -24,19 +47,22 @@ def change_wallpaper():
     file_name = pic_directory + "/Wallpapers/" + wp_obj['images'][0]['startdate'] + "_" + wp_obj['images'][0][
         'enddate'] + ".jpg"
 
-    if not os.path.exists(os.path.dirname(file_name)):
-        try:
-            os.makedirs(os.path.dirname(file_name))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
+    # set wallpaper only if its not set yet.
+    if not os.path.isfile(file_name):
+        if not os.path.exists(os.path.dirname(file_name)):
+            try:
+                os.makedirs(os.path.dirname(file_name))
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
 
-    with open(file_name, 'wb') as f:
-        for chunk in get_image.iter_content():
-            f.write(chunk)
+        with open(file_name, 'wb') as f:
+            for chunk in get_image.iter_content():
+                f.write(chunk)
 
-    # set the wallpaper
-    set_wallpaper(file_name)
+        # set the wallpaper
+        set_wallpaper(file_name)
+        clean_wallpaper_folder(file_name)
 
 
 if __name__ == '__main__':
