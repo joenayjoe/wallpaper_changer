@@ -27,7 +27,7 @@ def set_wallpaper(wp_uri):
         os.system("/usr/bin/gsettings set org.gnome.desktop.background picture-uri file://" + wp_uri)
     elif os_platform.startswith("Darwin"):
         # handle for MAC
-        os.system("osascript - e 'tell application \"Finder\" to set desktop picture to POSIX file \"" + wp_uri +"\"'")
+        os.system("osascript -e 'tell application \"Finder\" to set desktop picture to POSIX file \"" + wp_uri +"\"'")
     else:
         print("Your OS is not supported yet.")
 
