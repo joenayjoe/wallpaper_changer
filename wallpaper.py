@@ -16,7 +16,7 @@ Wallpaper folder. So we will keep most KEEP_RECENT number of wallpaper in the fo
 
 def clean_wallpaper_folder(file_path):
     folder_dir = os.path.dirname(file_path)
-    os.system("cd " + folder_dir + " && ls -t | tail -n +" + KEEP_RECENT + " | xargs rm --")
+    os.system("cd " + folder_dir + " && ls -t | tail -n +" + str(KEEP_RECENT) + " | xargs rm --")
 
 
 def set_wallpaper(wp_uri):
@@ -47,7 +47,7 @@ def change_wallpaper():
     file_name = pic_directory + "/Wallpapers/" + wp_obj['images'][0]['startdate'] + "_" + wp_obj['images'][0][
         'enddate'] + ".jpg"
 
-    # set wallpaper only if its not set yet.
+    # download wallpaper only if its not downloaded already.
     if not os.path.isfile(file_name):
         if not os.path.exists(os.path.dirname(file_name)):
             try:
@@ -60,9 +60,9 @@ def change_wallpaper():
             for chunk in get_image.iter_content():
                 f.write(chunk)
 
-        # set the wallpaper
-        set_wallpaper(file_name)
-        clean_wallpaper_folder(file_name)
+    # set the wallpaper
+    set_wallpaper(file_name)
+    clean_wallpaper_folder(file_name)
 
 
 if __name__ == '__main__':
