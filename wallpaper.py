@@ -6,6 +6,9 @@ import platform
 
 KEEP_RECENT = 5
 
+
+def get_platform():
+    return platform.platform()
 """
 This function will clean up the Wallpaper folder to save disk space.
 If all wallpapers are removed from the folder, only primary monitor will
@@ -21,13 +24,22 @@ def clean_wallpaper_folder(file_path):
 
 def set_wallpaper(wp_uri):
     # TODO: set wallpaper for different OS
-    os_platform = platform.system()
+    os_platform = get_platform()
     if os_platform.startswith("Linux"):
         # handle for linux
         os.system("/usr/bin/gsettings set org.gnome.desktop.background picture-uri file://" + wp_uri)
     elif os_platform.startswith("Darwin"):
         # handle for MAC
         os.system("osascript -e 'tell application \"Finder\" to set desktop picture to POSIX file \"" + wp_uri +"\"'")
+
+    elif os_platform.startswith("Window"):
+        # handle for Window
+        import ctypes
+        SPI_SETDESKWALLPAPER = 20
+        r = ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, wp_uri, 3)
+        if not r:
+            print(ctypes.WinError())
+
     else:
         print("Your OS is not supported yet.")
 
@@ -62,7 +74,8 @@ def change_wallpaper():
 
     # set the wallpaper
     set_wallpaper(file_name)
-    clean_wallpaper_folder(file_name)
+    if not get_platform().startswith("Window"):
+        clean_wallpaper_folder(file_name)
 
 
 if __name__ == '__main__':
